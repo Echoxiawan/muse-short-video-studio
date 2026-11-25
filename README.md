@@ -1,62 +1,99 @@
 # Muse Short Video Studio
 
-把四个开源 Muse 视频 skill 取长补短后，整合成的一个总 skill。共享出片约束和路由，下面挂四种可选模式；按模式选用提示词、连续性方法和执行后端，不要擅自接成一条从头跑到尾的超级管线。
+一个自包含的短视频技能包：把前期策划、电影感短片、动画短片 / IP 故事，以及可选的执行纪律收成同一个 skill。按模式选用提示词、连续性方法和执行后端，不要混用。
 
-技能文件：[`SKILL.md`](./SKILL.md)
+本仓库即可离线使用。把**整个文件夹**安装到 Agent 的技能目录后，只阅读本包内的相对路径文件，不必再去其他仓库取流程或模板。
 
-## 四种模式
+## 安装
 
-先确认要做什么，只选一种主模式；出片前可以先跑策划模式。
+复制整个目录，不要只拷 `SKILL.md`。`references/`、`templates/`、`scripts/`、`examples/` 必须与 `SKILL.md` 在同一棵目录树下。
 
-| 模式 | 适用 | 核心做法 |
-| --- | --- | --- |
-| A 前期策划 | 只要脚本、分镜、美术和声音方向，先不生成 | 按需加载导演等角色，产出策划包；字幕与画面提示词解耦；本阶段不发起付费请求 |
-| B 电影感短片 | 实拍感短片、提示词实验、多段拼长片 | 带时间轴的实战模板；按约 10 秒拆段，用续接快照顺序生成，再无损拼接 |
-| C 动画短片 / IP 故事 | 需要角色连贯和场次衔接的动画或剧情 | 先锁画幅和 Story Bible；Match Cut（上一场末帧 = 下一场首帧，且必须是同一文件）；mega prompt：FIRST FRAME / MOTION / CAMERA / LAST FRAME / SOUND / MUSIC / VO |
-| D 执行后端（默认关闭） | 照片说话、旧照修复上色、视频换人、无脸旁白短片 | 必须先确认执行通道；第三方 API、订阅和额度都要先征得同意再调用 |
-
-商业广告或品牌大片：先 A 再 B。需要人物连续的动画或剧情片，不要用模式 D 的「最多几场并行拼接」。
-
-## 共同硬规则
-
-- 单段按约 10 秒上限规划；更长的必须拆段再拼接。
-- 开始前先锁定画幅、成片语言和大致片长；提示词里写清精确比例。
-- 提示词先交给用户定稿，再按定稿原文送去生成。
-- 不承诺锁脸或人物全程同一人。续接快照、参考图、角色表只能提高延续的概率。
-- 密钥和 token 只走环境变量或密钥库，不写入仓库或聊天。
-- 付费、第三方 API、周额度必须先说明并得到同意再用。可能已经扣费的任务禁止自动重提。
-- 上传或本地文件名使用 ASCII，避免非 ASCII 文件名被上游拒绝。
-- 不要把某一种口音、某一家动画厂画风、某一个第三方模型或某条内部命令路径写成全局默认。
-
-## 使用方法
-
-把本仓库的 `SKILL.md` 放到你的 agent 技能目录中即可，例如：
-
-```text
-.cursor/skills/muse-short-video-studio/SKILL.md
+```bash
+cp -r muse-short-video-studio <你的技能目录>/muse-short-video-studio
 ```
 
-或在支持技能库的助手里安装 / 导入同名 skill。agent 会先按模式路由，再执行对应流程。
+常见技能目录示例（按你实际使用的 Agent 选择其一）：
 
-第三方执行通道（例如通过 useapi.net 调用用户自己的 Muse 订阅）默认关闭，不是安装后就会自动调用。
+- `~/.cursor/skills/`
+- `~/.codex/skills/`
+- 项目内的 `.agents/skills/` 或等效路径
 
-## 不是什么
+依赖：编写和策划不需要额外软件。抽帧与拼接需要本机已安装 `ffmpeg` 与 `ffprobe`。Python 3 用于 `scripts/extract_frames.py`。
 
-- 不是 Meta 官方 skill，也不绑定某一个付费视频接口。
-- 模式 A 里的「Muse」在源项目中指缪斯 / 灵感，不是专供 Meta Muse 出片。
-- 不保证人物身份锁定；需要强锁脸时，应改走用户指定、更适合参考图锁脸的下游模型，或停下说明限制。
+## 怎么用
 
-## 来源与致谢
+先读 [SKILL.md](SKILL.md) 完成路由和硬规则核对，再按模式打开对应参考文件：
 
-流程借鉴自以下 MIT 许可的开源项目，整合时保留原作者声明：
+| 用户要做的事 | 模式 | 先读 |
+|---|---|---|
+| 只出脚本、分镜、美术与声音方向，先不生成 | A 前期策划 | [references/mode-a-planning.md](references/mode-a-planning.md) |
+| 电影感实拍短片、提示词实验、多段拼长片 | B 电影感短片 | [references/mode-b-cinematic.md](references/mode-b-cinematic.md) |
+| 动画短片、IP 故事、角色连贯与场次衔接 | C 动画短片 | [references/mode-c-animation.md](references/mode-c-animation.md) |
+| 照片说话、旧照修复、视频换人，或用户已确认的执行通道 | D 执行后端（默认关闭） | [references/mode-d-backend.md](references/mode-d-backend.md) |
 
-- [masonmosen/muse-video-prompt-skill](https://github.com/masonmosen/muse-video-prompt-skill)（Mason Mosen）：Muse 内置视频的提示词与成片闭环
-- [sonlovinbot-team/Muse-animated-short-film](https://github.com/sonlovinbot-team/Muse-animated-short-film)（Đặng Hữu Sơn / sonlovinbot）：动画短片的角色表、剧本、首尾帧衔接与合成
-- [LuoJiangYong/muse-video-skill](https://github.com/LuoJiangYong/muse-video-skill)（Jiang Yong Luo）：前期策划引擎
-- [useapi/muse-api](https://github.com/useapi/muse-api) 的 `muse-video` skill（useapi.net）：第三方执行层，非 Meta 官方接口
+商业广告通常先 A 再 B。需要人物连续的动画不要用模式 D 的有限并行拼接。模式 B 用快照顺序接续；模式 C 用同一关键帧文件做 Match Cut；两者不要混用。
 
-第三方 API 的使用条款与收费以该服务当时规则为准，MIT 许可不覆盖其服务本身。
+## 目录
+
+```
+muse-short-video-studio/
+├── SKILL.md                          # 总路由与硬规则（先读这个）
+├── README.md
+├── LICENSE
+├── references/
+│   ├── mode-a-planning.md            # 策划流程、角色按需加载、可选编译器
+│   ├── mode-b-cinematic.md           # 电影感提示词、快照接续、拼接与验收
+│   ├── mode-c-animation.md           # 角色表到成片、Match Cut、旁白与合成
+│   ├── mode-d-backend.md             # 可选执行纪律（默认关闭，无内置客户端）
+│   └── qa-checklist.md               # 抽帧、衔接、音频与交付检查
+├── templates/
+│   ├── cinematic-prompt.md           # 带时间轴的实战模板 + POV / 口播 / 多段变体
+│   ├── animation-mega-prompt.md      # FIRST FRAME / MOTION / CAMERA / LAST FRAME / SOUND / MUSIC / VO
+│   ├── character-sheet.md            # 角色设定表
+│   ├── story-bible.md                # 故事圣经
+│   ├── creative-package.md           # 策划包大纲
+│   └── delivery-notes.md             # 交付说明
+├── scripts/
+│   ├── extract_frames.py             # 抽帧自查
+│   └── stitch_clips.sh               # 先探测再拼接（能 copy 就 copy）
+└── examples/
+    ├── mode-b-cinematic-example.md   # 虚构的 30 秒三折短片
+    └── mode-c-animation-example.md   # 虚构的四场动画，演示同一文件做 Match Cut
+```
+
+## 脚本
+
+在技能根目录或任意目录调用均可，把路径换成实际文件：
+
+```bash
+# 按时长均匀抽 4 帧（默认）
+python3 scripts/extract_frames.py clip.mp4 4 clip-qc
+
+# 抽首帧、中点、尾帧，便于看衔接
+python3 scripts/extract_frames.py clip.mp4 --junction clip-ends
+
+# 拼接：先探测，编码一致则无损复制，否则按画幅规范重编码再拼接
+bash scripts/stitch_clips.sh -a 16:9 -o film-full.mp4 seg1.mp4 seg2.mp4 seg3.mp4
+bash scripts/stitch_clips.sh -a 9:16 -o film-full.mp4 seg1.mp4 seg2.mp4
+```
+
+规范默认（仅在需要重编码时使用，不是某种片厂造型锁定）：16:9 → 1280×720、9:16 → 720×1280、24fps。输出文件名请使用 ASCII。
+
+## 硬规则（摘要）
+
+单段约 10 秒；先锁画幅；提示词经用户定稿后原文送出；不承诺锁脸；密钥不进仓库或聊天；付费与第三方接口须先征得同意；可能已扣费的任务禁止自动重提；文件名用 ASCII；模式 D 默认关闭。完整条款以 [SKILL.md](SKILL.md) 为准。
+
+## 致谢
+
+本包的流程与模板改编自以下 MIT 许可项目，并保留原作者声明（详见 [LICENSE](LICENSE)）：
+
+- [muse-video-prompt-skill](https://github.com/masonmosen/muse-video-prompt-skill)，Copyright (c) Mason Mosen
+- [Muse-animated-short-film](https://github.com/sonlovinbot-team/Muse-animated-short-film)，Copyright (c) Đặng Hữu Sơn (sonlovinbot)
+- [muse-video-skill](https://github.com/LuoJiangYong/muse-video-skill)，Copyright (c) Jiang Yong Luo
+- [useapi/muse-api](https://github.com/useapi/muse-api)（muse-video skill），Copyright (c) useapi.net
+
+这些链接只作署名。使用本技能时不必打开、克隆或安装上述项目，本仓库内的文件已经足够离线运行。第三方 API 的使用条款与收费以该服务当时规则为准，MIT 许可不覆盖其服务本身。
 
 ## 许可
 
-本仓库以 [MIT License](./LICENSE) 发布。
+本仓库以 [MIT License](LICENSE) 发布。
